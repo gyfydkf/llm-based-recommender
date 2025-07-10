@@ -1,0 +1,117 @@
+"""
+This module contains the self-query retriever node, which retrieves products using the self-query retriever.
+"""
+
+import os
+import sys
+from functools import lru_cache
+from typing import List
+
+from langchain.chains.query_constructor.base import load_query_constructor_runnable
+from langchain.retrievers import SelfQueryRetriever
+from langchain.schema import Document
+from langchain_chroma import Chroma
+from langchain_core.runnables import RunnableLambda
+from langchain_huggingface import HuggingFaceEmbeddings
+from loguru import logger
+from tenacity import retry, stop_after_attempt, wait_fixed
+
+# Local imports
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from src.config import settings
+from src.recommender.state import RecState
+from src.recommender.utils import CustomChromaTranslator, get_metadata_info
+from src.recommender.llm_factory import get_llm
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
+@lru_cache(maxsize=1)
+def initialize_embeddings_model() -> HuggingFaceEmbeddings:
+    """Initializes the HuggingFace embeddings model with retries and caching."""
+    try:
+        model_name = settings.EMBEDDINGS_MODEL_NAME
+        embeddings = HuggingFaceEmbeddings(model_name=model_name)
+        logger.info(f"Successfully initialized embeddings model: {model_name}")
+        return embeddings
+    except Exception as e:
+        logger.exception("Failed to initialize embeddings model.")
+        raise e
+
+
+def load_chroma_index(embeddings: HuggingFaceEmbeddings) -> Chroma:
+    """
+    Load the chroma index with caching.
+    """
+    try:
+        logger.info("Loading the chroma index...")
+        vectorstore = Chroma(
+            collection_name="product_collection",
+            embedding_function=embeddings,
+            persist_directory=settings.CHROMA_INDEX_PATH,
+        )
+        logger.info("Chroma index loaded.")
+        logger.info(
+            f"Number of documents in Chroma index: {vectorstore._collection.count()}"
+        )
+        return vectorstore
+    except Exception as e:
+        logger.exception("Failed to load the chroma index.")
+        raise e
+
+
+def build_self_query_chain(vectorstore: Chroma) -> RunnableLambda:
+    """
+    Returns a chain (RunnableLambda) that, given {"query": ...}, uses a SelfQueryRetriever
+    to fetch documents with advanced filtering. If no docs are found, it will return an empty list.
+    """
+    # 使用新的LLM工厂获取LLM实例
+    llm = get_llm("auto")
+
+    attribute_info, doc_contents = get_metadata_info()
+
+    # Build the query-constructor chain
+    query_constructor = load_query_constructor_runnable(
+        llm=llm,
+        document_contents=doc_contents,
+        attribute_info=attribute_info,
+    )
+
+    # Create a SelfQueryRetriever
+    retriever = SelfQueryRetriever(
+        query_constructor=query_constructor,
+        retriever=vectorstore.as_retriever(
+            search_type="similarity",
+            search_kwargs={"k": settings.FAISS_TOP_K},
+        ),
+        structured_query_translator=CustomChromaTranslator(),
+        verbose=True,
+    )
+
+    # Create a RunnableLambda that handles the retrieval
+    def self_query_retrieve(state: RecState) -> RecState:
+        """
+        Retrieves documents using self-query retriever.
+        """
+        try:
+            query = state["query"]
+            logger.info(f"Self-query retrieving for: {query}")
+
+            # Get documents from the retriever
+            docs = retriever.get_relevant_documents(query)
+
+            if docs:
+                logger.info(f"Found {len(docs)} documents using self-query retriever")
+                state["docs"] = docs
+            else:
+                logger.warning("No documents found using self-query retriever")
+                state["docs"] = []
+
+        except Exception as e:
+            logger.exception("Error in self-query retrieval")
+            state["docs"] = []
+
+        return state
+
+    return RunnableLambda(self_query_retrieve)
