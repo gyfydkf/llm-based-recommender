@@ -1,222 +1,167 @@
-# 🛍️ LLM-Based E-Commerce Fashion Recommender
+# 🛍️ 基于大语言模型的电商时尚推荐系统（定制版）
 
-**AI-powered fashion recommendation system leveraging LLMs, embeddings, and retrieval techniques to deliver personalized shopping experiences.**
-
-
+**一个个性化的 AI 时尚推荐系统，集成自定义大语言模型、支持多语言交互、本地数据集部署，并即将支持图像展示功能。**
 
 ---
 
-## 🚀 Project Overview
+## 🚀 项目概述
 
-This project is a **Retrieval-Augmented Generation (RAG)** chatbot designed for **fashion e-commerce**. It provides **personalized recommendations, answers product queries**, and **enhances user engagement** using **state-of-the-art LLMs and vector-based retrieval**.
+本项目是一个面向时尚电商的 **RAG（检索增强生成）聊天机器人**，能够实现：
+- 个性化时尚产品推荐  
+- 多语言响应（支持中英文）  
+- 实时交互体验  
 
-Built with **FastAPI, FAISS, ChromaDB, LangChain, Ollama, and Streamlit**, this system efficiently indexes a **30K-product fashion dataset** and serves real-time recommendations.
+系统基于 **FastAPI、FAISS、ChromaDB、LangChain、Ollama、Streamlit** 构建，索引了包含 30,000 件商品的大型时尚数据集，并提供高效准确的推荐服务。
 
----
-
-## ✨ Features
-
-✅ **AI-Powered Fashion Recommendations** – Get **smart** and **personalized** product suggestions.\
-✅ **Hybrid Retrieval (FAISS + BM25 + ChromaDB)** – Multi-modal search for **better results**.\
-✅ **LLM-Driven Q&A** – Handles **customer queries** with **real-time responses**.\
-✅ **Cross-Encoder Reranking** – Improves **retrieval accuracy**.\
-✅ **Self-Querying Retriever** – Converts queries into **structured filters**.\
-✅ **Streamlit Chatbot UI** – A modern, user-friendly **interface**.\
-✅ **FastAPI Backend** – A **scalable API** serving the recommender.\
-✅ **Dockerized Deployment** – Runs seamlessly **in containers**.
+✨ 当前新增功能包括：自定义模型接入、多语言支持、本地部署优化、图像推荐即将上线。
 
 ---
 
-## 🏗️ Tech Stack
+## ✨ 最新亮点
 
-| Category                | Tools Used                              |
-| ----------------------- | --------------------------------------- |
-| **Programming**         | `Python 3.12`                           |
-| **LLM Models**          | `GPT-4o-mini`, `Llama 3.2:3B`, `Ollama` |
-| **Vector Search**       | `FAISS`, `ChromaDB`                     |
-| **Retrieval & Ranking** | `BM25`, `LangChain`                     |
-| **Backend**             | `FastAPI`, `Pydantic`, `Loguru`         |
-| **Frontend**            | `Streamlit`                             |
-| **Deployment**          | `Docker`, `Docker Compose`              |
-| **Data Handling**       | `Pandas`, `Numpy`, `Kaggle API`         |
-| **GPU Acceleration**    | `CUDA`, `NVIDIA Docker`, `PyTorch`      |
+✅ 替换原始 LLM，接入自定义语言模型，提升响应速度与相关性  
+✅ 支持中英文查询与回复  
+✅ 本地部署数据索引管道优化，适配离线使用  
+✅ 🖼️ **即将上线**：图像展示功能（Streamlit UI）  
+✅ 📦 **即将上线**：完全离线部署模式（适用于局域网/无网环境）
 
 ---
 
-## 🔧 Setup & Installation
+## 🏗️ 技术栈
 
-### 1️⃣ Prerequisites
+| 模块分类     | 工具与框架                          |
+| ------------ | ---------------------------------- |
+| 编程语言     | Python 3.12                        |
+| 语言模型     | 自定义 LLM、GPT-4o-mini、Ollama    |
+| 向量检索     | FAISS、ChromaDB                    |
+| 文本检索     | BM25、LangChain                    |
+| 后端服务     | FastAPI、Pydantic、Loguru          |
+| 前端界面     | Streamlit                          |
+| 部署方式     | Docker、Docker Compose             |
+| 数据处理     | Pandas、Numpy、Kaggle API（可选）  |
+| GPU 加速     | CUDA、NVIDIA Docker、PyTorch       |
 
-- Python **3.12+**
-- Docker & Docker Compose
-- Ollama installed on your machine
+---
 
-### 2️⃣ Clone the Repository
+## 🔧 安装与使用
+
+### 1️⃣ 安装前准备
+
+- Python 3.12+
+- 安装好 Docker 和 Docker Compose
+- 已安装 Ollama 并加载你定制的模型
+
+### 2️⃣ 克隆项目仓库
 
 ```bash
-git clone https://github.com/amine-akrout/llm-based-recommender.git
+git clone https://github.com/yourname/llm-based-recommender.git
 cd llm-based-recommender
-```
+````
 
-### 3️⃣ Set Up Environment
-
-Copy the example `.env` file and configure necessary credentials:
+### 3️⃣ 配置环境变量
 
 ```bash
 cp .env.example .env
 ```
 
-Modify the `.env` file to include your **Kaggle API key**, **OpenAI API key**, and **other configurations**.
+请根据需要修改 `.env` 文件，填写如下信息：
 
-### 4️⃣ Run the Application
+* 模型名称（Ollama 或本地模型）
+* 本地数据集路径
+* API Key（如果需要联网模型）
 
-#### 🐳 **With Docker Compose** (Recommended)
+### 4️⃣ 启动项目
 
-##### CPU Version
+#### 🐳 推荐方式：Docker 启动
+
 ```bash
 docker-compose up --build
 ```
-Or 
-```bash
-Make docker-start
-```
 
-##### 🚀 **GPU Version** (Recommended for Performance)
-```bash
-# Windows
-run_gpu.bat
-
-# Linux/macOS
-./run_gpu.sh
-
-# Or manually
-docker-compose -f docker-compose.gpu.yml up --build
-```
-
-**GPU版本提供3-15倍的性能提升！** 查看 [GPU使用指南](docs/GPU_GUIDE.md) 了解详情。
-
-#### 🏗️ **Manual Setup (Local Environment) using Makefile**
+#### 🏗️ 本地方式（Makefile）
 
 ```bash
-Make install-python # Install Python
-Make install # Install dependencies
-Make indexing # Index the dataset
-Make retriever # Create the retriever
-Make app # Start the FastAPI app
-Make ui # Start the Streamlit UI
+make install-python
+make install
+make indexing
+make retriever
+make app
+make ui
 ```
 
 ---
 
-## 📡 API Endpoints
+## 📡 API 接口文档
 
-The FastAPI backend exposes multiple endpoints. After running the API, visit **Swagger Docs**:
+项目启动后可访问以下接口：
 
-🔗 **Swagger UI**: [`http://localhost:8000/docs`](http://localhost:8000/docs)\
-🔗 **Redoc**: [`http://localhost:8000/redoc`](http://localhost:8000/redoc)
+* Swagger：[`http://localhost:8000/docs`](http://localhost:8000/docs)
+* Redoc：[`http://localhost:8000/redoc`](http://localhost:8000/redoc)
 
-| Method | Endpoint      | Description                         |
-| ------ | ------------- | ----------------------------------- |
-| `POST` | `/recommend/` | Get fashion product recommendations |
-| `GET`  | `/health`     | Check API health status             |
-
----
-
-## 🖥️ Streamlit Chatbot UI
-
-🔗 **Access the UI** at: [`http://localhost:8501`](http://localhost:8501)
-
-The chatbot interface allows users to **ask for product recommendations**, filter results, and get **AI-powered responses**.
+| 方法   | 接口地址          | 描述          |
+| ---- | ------------- | ----------- |
+| POST | `/recommend/` | 获取个性化商品推荐结果 |
+| GET  | `/health`     | 检查系统运行状态    |
 
 ---
 
-## 📊 Data & Indexing
+## 🖥️ Chatbot 可视化界面
 
-The recommender is built using a **30K-product e-commerce dataset** indexed with **FAISS, BM25, and ChromaDB**.
+访问地址：[`http://localhost:8501`](http://localhost:8501)
 
-### Indexing Pipeline:
+支持中英文交互，后续还将支持：
 
-1. **Download Dataset** – Uses `Kaggle API`
-2. **Preprocess Data** – Cleans and structures the dataset
-3. **Generate Embeddings** – Vectorizes product descriptions
-4. **Store in FAISS & BM25** – Hybrid retrieval for fast search
+* 🖼️ 商品图片展示
+* 🧭 条件筛选和风格标签推荐
 
 ---
 
+## 📊 数据与索引
 
-## 🔄 Recommendation Flow
+支持 Kaggle 在线数据集下载，也支持本地数据导入索引。流程如下：
 
-The chatbot's recommendation process follows a structured **LangGraph workflow**:
+1. 数据清洗、去重
+2. 生成 Embedding（支持自定义 tokenizer）
+3. 构建 FAISS、BM25、ChromaDB 索引
 
-![Recommendation Flow](assets/flow.png)
-
-1. **Check Topic**: Determines if the query is relevant to fashion.
-2. **Self-Query Retrieve**: Extracts relevant product information.
-3. **Ranker**: If retrieval returns empty, BM25 & FAISS rank results.
-4. **RAG Recommender**: Uses LLM to generate the final recommendation.
-
-
+✅ 可配置为**完全离线部署模式**，适配隐私场景。
 
 ---
-<!-- streamlit demo -->
-## 📺 Demo 
 
-![Demo](assets/demo.png)
+## 🔄 推荐流程图
 
+```
+用户输入 → 语言识别 → 可选查询改写
+→ FAISS + BM25 混合检索 → 编码重排序
+→ LangGraph 控制流 → 最终推荐结果生成 → 输出到 UI
+```
 
-## 🛠️ Project Structure
+---
+
+## 🖼️ 即将推出
+
+* ✅ Chat UI 中展示商品图像
+* ✅ 离线部署指南（适配局域网）
+* ✅ 多风格推荐（如休闲 / 商务 / 季节风）
+* ✅ 用户偏好记忆与个性画像功能
+
+敬请期待下一版本！
+
+---
+
+## 📁 项目结构
 
 ```
 📦 llm-based-recommender
-├── 📂 src
-│   ├── 📂 api                 # FastAPI Backend
-│   ├── 📂 indexing            # FAISS, BM25, Chroma Indexing
-│   ├── 📂 retriever           # Query Processing
-│   ├── 📂 recommender         # Core LLM-based Recommender
-│   ├── 📂 ui                  # Streamlit Chatbot
-│   ├── config.py              # App Configuration
-├── 📄 docker-compose.yml      # Docker Services
-├── 📄 Dockerfile              # API Containerization
-├── 📄 pyproject.toml          # Project Dependencies
-├── 📄 requirements.txt        # Python Packages
-├── 📄 .env.example            # Environment Variables
+├── src/
+│   ├── api/               # FastAPI 后端
+│   ├── indexing/          # 数据处理与索引构建
+│   ├── retriever/         # 检索逻辑
+│   ├── recommender/       # LLM 推荐器
+│   ├── ui/                # Streamlit 聊天界面
+│   └── config.py
+├── assets/                # 图片和流程图
+├── .env.example
+├── docker-compose.yml
+├── requirements.txt
 ```
-
----
-
-## 🎯 Future Improvements
-
-🔹 **Fine-tune LLM for better recommendations**\
-🔹 **Improve UI/UX with product images**\
-🔹 **Add multi-language support**\
-🔹 **Deploy to AWS/GCP**\
-🔹 **Multi-GPU support for enterprise deployment**\
-🔹 **Real-time GPU performance monitoring**
-
----
-
-## 🏆 Contributing
-
-Contributions are welcome! If you’d like to contribute:
-
-1️⃣ Fork the repo\
-2️⃣ Create a new branch\
-3️⃣ Commit your changes\
-4️⃣ Submit a pull request
-
-For major changes, please open an issue first to discuss what you’d like to change.
-
----
-
-## ⭐ Star This Repo!
-
-If you find this project useful, don’t forget to **⭐ star** the repository! 🚀✨
-
----
-
-### 📩 Contact
-
-👤 **Amine**\
-💼 [**LinkedIn**](https://linkedin.com/in/akroutamine)
-
----
