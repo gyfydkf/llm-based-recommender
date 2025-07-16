@@ -21,6 +21,8 @@ class RecState(TypedDict):
         The retrieved products.
     self_query_state: str
         The self-query state.
+    docs: list
+        The retrieved documents.
     """
 
     query: str
@@ -28,3 +30,4 @@ class RecState(TypedDict):
     recommendation: str
     products: str
     self_query_state: str
+    docs: list

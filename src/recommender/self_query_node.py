@@ -78,14 +78,12 @@ def build_self_query_chain(vectorstore: Chroma) -> RunnableLambda:
         attribute_info=attribute_info,
     )
 
-    # Create a SelfQueryRetriever
+    # Create a SelfQueryRetriever (LangChain v0.3.x 新接口)
     retriever = SelfQueryRetriever(
         query_constructor=query_constructor,
-        retriever=vectorstore.as_retriever(
-            search_type="similarity",
-            search_kwargs={"k": settings.FAISS_TOP_K},
-        ),
+        vectorstore=vectorstore,  # 新版要求直接传入底层 VectorStore
         structured_query_translator=CustomChromaTranslator(),
+        search_kwargs={"k": settings.FAISS_TOP_K},
         verbose=True,
     )
 

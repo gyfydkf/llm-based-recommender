@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     MIN_SAMPLE_SIZE: int = 50       # 最小样本数
 
     # LLM settings - OpenRouter Configuration
-    LLM_MODEL_NAME: str = os.environ.get("LLM_MODEL_NAME", "deepseek-r1-0528:free")
+    LLM_MODEL_NAME: str = os.environ.get("LLM_MODEL_NAME", "x-ai/grok-4")
     LLM_TEMPERATURE: float = 0.1
     LLM_MAX_TOKENS: int = 2048
     LLM_REQUEST_TIMEOUT: int = 60
@@ -70,7 +70,8 @@ class Settings(BaseSettings):
     USE_OPENROUTER: bool = True  # 优先使用OpenRouter
     USE_OLLAMA: bool = False     # 备用Ollama
 
-    FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index.faiss")
+    # FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index.faiss")
+    FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index")
     BM25_INDEX_PATH: str = str(INDEX_DIR / "bm25_index.pkl")
     CROSS_ENCODER_RERANKER_PATH: str = str(INDEX_DIR / "cross_encoder_reranker.pkl")
     CHROMA_INDEX_PATH: str = str(INDEX_DIR / "chroma_index")

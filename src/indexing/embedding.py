@@ -136,6 +136,7 @@ def create_faiss_index(embeddings: HuggingFaceEmbeddings, documents: list) -> No
     try:
         logger.info("Creating FAISS index...")
         faiss_index = FAISS.from_documents(documents, embeddings)
+        os.makedirs(settings.FAISS_INDEX_PATH, exist_ok=True)   # 确保目录存在
         faiss_index.save_local(settings.FAISS_INDEX_PATH)
         logger.info(f"FAISS index saved at {settings.FAISS_INDEX_PATH}")
     except Exception as e:
