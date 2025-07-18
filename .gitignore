@@ -9,7 +9,6 @@ build/
 
 # data files
 data/
-*.csv
 *.faiss
 *.pkl
 *.pickle

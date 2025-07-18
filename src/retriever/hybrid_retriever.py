@@ -20,6 +20,7 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from src.config import settings
+from src.indexing.jieba_bm25 import load_jieba_bm25_index, JiebaBM25LangChainRetriever
 
 warnings.filterwarnings("ignore")
 
@@ -67,8 +68,11 @@ def load_bm25_index() -> object:
     """
     try:
         logger.info("Loading BM25 index...")
-        with open(settings.BM25_INDEX_PATH, "rb") as file:
-            bm25_retriever = pickle.load(file)
+        # with open(settings.BM25_INDEX_PATH, "rb") as file:
+        #     bm25_retriever = pickle.load(file)
+
+        jieba_bm25_retriever = load_jieba_bm25_index(settings.BM25_INDEX_PATH)
+        bm25_retriever = JiebaBM25LangChainRetriever(jieba_bm25_retriever)
         return bm25_retriever
     except FileNotFoundError:
         logger.warning("BM25 index not found. Proceeding with FAISS-only retrieval.")

@@ -23,6 +23,7 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.config import settings
 from src.indexing.data_loader import download_data
+from src.indexing.jieba_bm25 import create_jieba_bm25_index, save_jieba_bm25_index
 
 warnings.filterwarnings("ignore")
 
@@ -109,7 +110,7 @@ def generate_documents(use_csv_loader: bool = False) -> list:
 
     documents = [
         Document(
-            page_content=json.dumps(row.to_dict(), indent=2),
+            page_content=json.dumps(row.to_dict(), indent=2, ensure_ascii=False),
             metadata=row.to_dict(),
             id=row.name,
         )
@@ -167,10 +168,12 @@ def create_bm25_index(documents: list) -> None:
         os.makedirs(os.path.dirname(settings.BM25_INDEX_PATH), exist_ok=True)
 
         logger.info("Creating BM25 index...")
-        bm25_index = BM25Retriever.from_documents(documents)
+        # bm25_index = BM25Retriever.from_documents(documents)
 
-        with open(settings.BM25_INDEX_PATH, "wb") as f:
-            pickle.dump(bm25_index, f)
+        # with open(settings.BM25_INDEX_PATH, "wb") as f:
+        #     pickle.dump(bm25_index, f)
+        jieba_bm25_index = create_jieba_bm25_index(documents)
+        save_jieba_bm25_index(jieba_bm25_index, settings.BM25_INDEX_PATH)
 
         logger.info(f"BM25 index saved at {settings.BM25_INDEX_PATH}")
     except Exception as e:
@@ -181,17 +184,17 @@ def create_bm25_index(documents: list) -> None:
 def embedding_pipeline(n_samples: Optional[int] = None) -> None:
     """Runs the entire embedding pipeline with lightweight settings."""
     try:
-        # Use default sample size if not specified
-        if n_samples is None:
-            n_samples = settings.DEFAULT_SAMPLE_SIZE
+    #     # Use default sample size if not specified
+    #     if n_samples is None:
+    #         n_samples = settings.DEFAULT_SAMPLE_SIZE
         
-        # Ensure sample size is within limits
-        n_samples = max(settings.MIN_SAMPLE_SIZE, min(n_samples, settings.MAX_SAMPLE_SIZE))
+    #     # Ensure sample size is within limits
+    #     n_samples = max(settings.MIN_SAMPLE_SIZE, min(n_samples, settings.MAX_SAMPLE_SIZE))
         
-        logger.info(f"Running lightweight embedding pipeline with {n_samples} samples")
+    #     logger.info(f"Running lightweight embedding pipeline with {n_samples} samples")
         
-        download_data()
-        df = load_and_preprocess_data(n_samples)
+    #     download_data()
+    #     df = load_and_preprocess_data(n_samples)
         documents = generate_documents()
         embeddings = initialize_embeddings_model()
 

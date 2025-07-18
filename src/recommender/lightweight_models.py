@@ -4,6 +4,7 @@ Lightweight models for resource-constrained environments.
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from loguru import logger
+from src.config import settings
 
 
 def get_lightweight_embeddings():
@@ -15,7 +16,7 @@ def get_lightweight_embeddings():
     """
     try:
         # Use a smaller, faster model for lightweight deployment
-        model_name = "sentence-transformers/all-MiniLM-L6-v2"
+        model_name = settings.LIGHTWEIGHT_EMBEDDINGS_MODEL
         logger.info(f"Loading lightweight embeddings model: {model_name}")
         
         embeddings = HuggingFaceEmbeddings(
@@ -32,7 +33,7 @@ def get_lightweight_embeddings():
         # Fallback to default model
         logger.info("Falling back to default embeddings model")
         return HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
+            model_name=settings.EMBEDDINGS_MODEL_NAME
         )
 
 
