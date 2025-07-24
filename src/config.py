@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     MIN_SAMPLE_SIZE: int = 50       # 最小样本数
 
     # LLM settings - OpenRouter Configuration
-    LLM_MODEL_NAME: str = os.environ.get("LLM_MODEL_NAME", "x-ai/grok-4")
+    LLM_MODEL_NAME: str = os.environ.get("LLM_MODEL_NAME", "openai/gpt-4o-mini")
     LLM_TEMPERATURE: float = 0.1
     LLM_MAX_TOKENS: int = 2048
     LLM_REQUEST_TIMEOUT: int = 60
