@@ -60,6 +60,32 @@ def rag_recommender(state: RecState) -> RecState:
     try:
         query = state["query"]
         docs = state.get("docs", [])
+
+        # --------- 品类过滤逻辑 begin ---------
+        CATEGORY_KEYWORDS = ["裙", "裤", "衬衫", "T恤", "夹克", "外套", "背心"]
+        def extract_category_from_query(query):
+            for cat in CATEGORY_KEYWORDS:
+                if cat in query:
+                    return cat
+            return None
+        def filter_docs_by_category(docs, category):
+            if not category:
+                return docs
+            filtered = []
+            for doc in docs:
+                # 兼容 page_content 为 json 或 str
+                details = ""
+                if hasattr(doc, "metadata") and isinstance(doc.metadata, dict):
+                    details = doc.metadata.get("Product Details", "")
+                if not details and hasattr(doc, "page_content"):
+                    details = doc.page_content
+                if category in details:
+                    filtered.append(doc)
+            return filtered
+        category = extract_category_from_query(query)
+        docs = filter_docs_by_category(docs, category)
+        state["docs"] = docs
+        # --------- 品类过滤逻辑 end ---------
         
         if not docs:
             logger.warning("No documents found for RAG recommendation")

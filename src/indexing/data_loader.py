@@ -35,5 +35,31 @@ def download_data() -> None:
         raise e
 
 
+# 假设 docs 是 List[Document]，每个 doc.metadata["Product Details"] 是商品描述
+CATEGORY_KEYWORDS = ["裙", "裤", "衬衫", "T恤", "夹克", "外套", "背心"]
+
+def extract_category_from_query(query):
+    for cat in CATEGORY_KEYWORDS:
+        if cat in query:
+            return cat
+    return None
+
+def filter_docs_by_category(docs, category):
+    if not category:
+        return docs
+    filtered = []
+    for doc in docs:
+        details = doc.metadata.get("Product Details", "")
+        if category in details:
+            filtered.append(doc)
+    return filtered
+
+# 在 rag_recommender 或 self_query_retrieve 里加
+category = extract_category_from_query(state["query"])
+docs = state.get("docs", [])
+docs = filter_docs_by_category(docs, category)
+state["docs"] = docs
+
+
 if __name__ == "__main__":
     download_data()

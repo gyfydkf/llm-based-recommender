@@ -22,7 +22,7 @@ from loguru import logger
 # Append project root directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.config import settings
-from src.indexing.data_loader import download_data
+##from src.indexing.data_loader import download_data
 from src.indexing.jieba_bm25 import create_jieba_bm25_index, save_jieba_bm25_index
 
 warnings.filterwarnings("ignore")
@@ -99,7 +99,8 @@ def generate_documents(use_csv_loader: bool = False) -> list:
             size.strip().lower() for size in value.replace("Size:", "").split(",")
         )
 
-    df = pd.read_csv(settings.PROCESSED_DATA_PATH)
+    df = pd.read_csv(settings.PROCESSED_DATA_PATH, encoding="gbk")
+
     # Convert "Available Sizes"
     if "Available Sizes" in df.columns:
         df["Available Sizes"] = df["Available Sizes"].apply(convert_sizes)
@@ -124,7 +125,7 @@ def initialize_embeddings_model() -> HuggingFaceEmbeddings:
     """Initializes the HuggingFace embeddings model."""
     try:
         model_name = settings.EMBEDDINGS_MODEL_NAME
-        embeddings = HuggingFaceEmbeddings(model_name=model_name)
+        embeddings = HuggingFaceEmbeddings(model_name=model_name, model_kwargs={"device": "cpu"})
         logger.info(f"Successfully initialized embeddings model: {model_name}")
         return embeddings
     except Exception as e:

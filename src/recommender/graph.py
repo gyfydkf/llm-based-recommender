@@ -33,19 +33,40 @@ def create_recommendaer_graph():
             state["docs"] = []
             return state
 
+    # 新增：非时尚推荐时的 LLM 回复节点
+    def not_fashion_llm_response(state):
+        try:
+            from src.recommender.llm_factory import get_llm
+            llm = get_llm("auto")
+            user_query = state["query"]
+            # 生成通用回复并加提示
+            prompt = f"用户提问：{user_query}\n\n很抱歉，我目前只支持时尚穿搭相关的智能推荐。请提问与时尚穿搭相关的问题，例如：‘推荐夏日连衣裙’、‘适合面试的男士西装’等。"
+            response = llm.invoke(prompt)
+            # 只返回内容部分，避免元数据泄露
+            if hasattr(response, "content"):
+                state["recommendation"] = response.content
+            else:
+                state["recommendation"] = str(response)
+        except Exception as e:
+            logger.error(f"Error in not_fashion_llm_response: {e}")
+            state["recommendation"] = "很抱歉，我目前只支持时尚穿搭相关的智能推荐。请提问与时尚穿搭相关的问题。"
+        return state
+
     workflow.add_node("self_query_retrieve", self_query_retrieve)
     workflow.add_node("rag_recommender", rag_recommender)
     workflow.add_node("ranker", ranker_node)
     workflow.add_node("check_topic", topic_classifier)
+    workflow.add_node("not_fashion_llm_response", not_fashion_llm_response)  # 新增节点
 
     workflow.add_edge("ranker", "rag_recommender")
     workflow.add_edge("rag_recommender", END)
+    workflow.add_edge("not_fashion_llm_response", END)  # 新增终止
 
     workflow.set_entry_point("check_topic")
     workflow.add_conditional_edges(
         "check_topic",
         lambda state: state["on_topic"],
-        {"Yes": "self_query_retrieve", "No": END},
+        {"Yes": "self_query_retrieve", "No": "not_fashion_llm_response"},  # 修改分支
     )
 
     workflow.add_conditional_edges(
