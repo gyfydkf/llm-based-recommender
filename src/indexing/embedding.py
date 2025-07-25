@@ -22,7 +22,11 @@ from loguru import logger
 # Append project root directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.config import settings
+<<<<<<< HEAD
 ##from src.indexing.data_loader import download_data
+=======
+# from src.indexing.data_loader import download_data
+>>>>>>> 19437a879e18774f7c361284dbc9a6b65a30335e
 from src.indexing.jieba_bm25 import create_jieba_bm25_index, save_jieba_bm25_index
 
 warnings.filterwarnings("ignore")
