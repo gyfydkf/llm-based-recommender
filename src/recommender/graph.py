@@ -40,7 +40,7 @@ def create_recommendaer_graph():
             llm = get_llm("auto")
             user_query = state["query"]
             # 生成通用回复并加提示
-            prompt = f"用户提问：{user_query}\n\n很抱歉，我目前只支持时尚穿搭相关的智能推荐。请提问与时尚穿搭相关的问题，例如：‘推荐夏日连衣裙’、‘适合面试的男士西装’等。"
+            prompt = f"用户提问：{user_query}\n\n 你需要针对用户提问作出合理、得体的回答。并提醒用户你的专业是时尚穿搭推荐、询问用户需要什么样的服装"
             response = llm.invoke(prompt)
             # 只返回内容部分，避免元数据泄露
             if hasattr(response, "content"):
