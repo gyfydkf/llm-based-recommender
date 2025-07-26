@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     CROSS_ENCODER_MODEL_NAME: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
     # Lightweight model settings for server deployment
-    USE_LIGHTWEIGHT_MODELS: bool = True
+    USE_LIGHTWEIGHT_MODELS: bool = False
     LIGHTWEIGHT_EMBEDDINGS_MODEL: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     LIGHTWEIGHT_CROSS_ENCODER: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     LIGHTWEIGHT_LLM: str = "llama3.2:1b"  # 更小的模型
@@ -64,7 +64,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: SecretStr | None = SecretStr(os.environ.get("OPENAI_API_KEY", ""))
     
     # Ollama settings (fallback)
-    OLLAMA_MODEL_NAME: str = "llama3.2:3b"
+    OLLAMA_MODEL_NAME: str = "llama3:8b"
     OLLAMA_HOST: str = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
     
     # LLM Provider Selection
