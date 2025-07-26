@@ -31,9 +31,8 @@ from src.recommender.llm_factory import get_llm
 def initialize_embeddings_model() -> HuggingFaceEmbeddings:
     """Initializes the HuggingFace embeddings model with retries and caching."""
     try:
-        model_name = settings.EMBEDDINGS_MODEL_NAME
-        embeddings = HuggingFaceEmbeddings(model_name=model_name)
-        logger.info(f"Successfully initialized embeddings model: {model_name}")
+        embeddings = HuggingFaceEmbeddings(model_name=settings.EMBEDDINGS_MODEL_PATH)
+        logger.info(f"Successfully initialized embeddings model: {settings.EMBEDDINGS_MODEL_NAME}")
         return embeddings
     except Exception as e:
         logger.exception("Failed to initialize embeddings model.")
