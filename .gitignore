@@ -13,6 +13,9 @@ data/
 *.pkl
 *.pickle
 
+# models
+models/ 
+
 !src/data/
 
 

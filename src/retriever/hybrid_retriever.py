@@ -41,7 +41,7 @@ def load_faiss_index() -> FAISS:
             embeddings_model = get_lightweight_embeddings()
         else:
             embeddings_model = HuggingFaceEmbeddings(
-                model_name=settings.EMBEDDINGS_MODEL_NAME
+                model_name=settings.EMBEDDINGS_MODEL_PATH
             )
             
         vector_store = FAISS.load_local(
@@ -113,8 +113,8 @@ def create_cross_encoder_reranker(
         ContextualCompressionRetriever instance.
     """
     logger.info("Creating cross encoder reranker...")
-    model_name = settings.CROSS_ENCODER_MODEL_NAME
-    model = HuggingFaceCrossEncoder(model_name=model_name)
+    model_path = settings.CROSS_ENCODER_MODEL_PATH
+    model = HuggingFaceCrossEncoder(model_name=model_path)
     compressor = CrossEncoderReranker(model=model, top_n=3)
 
     return ContextualCompressionRetriever(

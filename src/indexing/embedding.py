@@ -124,9 +124,9 @@ def generate_documents(use_csv_loader: bool = False) -> list:
 def initialize_embeddings_model() -> HuggingFaceEmbeddings:
     """Initializes the HuggingFace embeddings model."""
     try:
-        model_name = settings.EMBEDDINGS_MODEL_NAME
-        embeddings = HuggingFaceEmbeddings(model_name=model_name)
-        logger.info(f"Successfully initialized embeddings model: {model_name}")
+        model_path = settings.EMBEDDINGS_MODEL_PATH
+        embeddings = HuggingFaceEmbeddings(model_name=model_path)
+        logger.info(f"Successfully initialized embeddings model: {settings.EMBEDDINGS_MODEL_NAME}")
         return embeddings
     except Exception as e:
         logger.exception("Failed to initialize embeddings model.")

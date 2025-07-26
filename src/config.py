@@ -39,8 +39,10 @@ class Settings(BaseSettings):
     # EMBEDDINGS_MODEL_NAME: str = "BAAI/llm-embedder"
     # EMBEDDINGS_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
     EMBEDDINGS_MODEL_NAME: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    EMBEDDINGS_MODEL_PATH: str = str(BASE_DIR / "models" / "embeddings")
     # CROSS_ENCODER_MODEL_NAME: str = "BAAI/bge-reranker-base"
     CROSS_ENCODER_MODEL_NAME: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    CROSS_ENCODER_MODEL_PATH: str = str(BASE_DIR / "models" / "cross-encoder")
 
     # Lightweight model settings for server deployment
     USE_LIGHTWEIGHT_MODELS: bool = False
@@ -68,8 +70,8 @@ class Settings(BaseSettings):
     OLLAMA_HOST: str = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
     
     # LLM Provider Selection
-    USE_OPENROUTER: bool = True  # 优先使用OpenRouter
-    USE_OLLAMA: bool = False     # 备用Ollama
+    USE_OPENROUTER: bool = False  
+    USE_OLLAMA: bool = True     
 
     # FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index.faiss")
     FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index")
