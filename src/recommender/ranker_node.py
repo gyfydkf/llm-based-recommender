@@ -54,4 +54,5 @@ def ranker_node(state: RecState) -> RecState:
     query = state["query"]
     product_list = build_ranker(query)
     state["products"] = product_list
+    state["ranker_attempted"] = True
     return state

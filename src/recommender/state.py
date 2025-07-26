@@ -23,6 +23,8 @@ class RecState(TypedDict):
         The self-query state.
     docs: list
         The retrieved documents.
+    ranker_attempted: bool
+        Whether the ranker node has been attempted.
     """
 
     query: str
@@ -31,3 +33,4 @@ class RecState(TypedDict):
     products: str
     self_query_state: str
     docs: list
+    ranker_attempted: bool

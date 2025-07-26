@@ -74,6 +74,14 @@ def create_recommendaer_graph():
         lambda state: "success" if state.get("docs") else "empty",
         {"success": "rag_recommender", "empty": "ranker"},
     )
+    
+    # 新增：rag_recommender的条件边
+    workflow.add_conditional_edges(
+        "rag_recommender",
+        lambda state: "continue" if not state.get("docs") and not state.get("products") and not state.get("ranker_attempted") else "end",
+        {"continue": "ranker", "end": END},
+    )
+    
     return workflow.compile()
 
 

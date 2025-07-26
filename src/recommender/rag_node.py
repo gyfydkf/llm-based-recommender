@@ -61,6 +61,9 @@ def rag_recommender(state: RecState) -> RecState:
         query = state["query"]
         docs = state.get("docs", [])
         products = state.get("products", "")
+        
+        # 检查是否已经尝试过ranker（通过检查是否有ranker_attempted标志）
+        ranker_attempted = state.get("ranker_attempted", False)
 
         # --------- 品类过滤逻辑 begin ---------
         CATEGORY_KEYWORDS = ["裙", "裤", "衬衫", "T恤", "夹克", "外套", "背心"]
@@ -99,11 +102,23 @@ def rag_recommender(state: RecState) -> RecState:
                     # 移除开头的 "- " 并创建文档对象
                     content = product.strip("- ")
                     docs.append({"page_content": content})
+            category = extract_category_from_query(query)
+            docs = filter_docs_by_category(docs, category)
+            state["docs"] = docs
         
-        if not docs and not products:
-            logger.warning("No documents or products found for RAG recommendation")
+        # 如果docs和products都为空，且还没有尝试过ranker，则跳转到ranker
+        if not docs and not products and not ranker_attempted:
+            logger.info("No documents found, will try ranker node")
+            return state  # 让图流程继续到ranker节点
+        
+        # 如果经过ranker后仍然没有docs和products，才返回未找到
+        if not docs and not products and ranker_attempted:
+            logger.warning("No documents or products found for RAG recommendation after trying ranker")
             state["recommendation"] = "抱歉，我没有找到相关的产品信息。请尝试更具体的查询。"
             return state
+
+        # 使用最新的docs值（可能来自products转换）
+        final_docs = state.get("docs", docs)
 
         # Build the RAG chain
         rag_chain = build_rag_chain()
@@ -111,7 +126,7 @@ def rag_recommender(state: RecState) -> RecState:
         # Generate recommendation
         recommendation = rag_chain.invoke({
             "query": query,
-            "docs": docs
+            "docs": final_docs
         })
         
         state["recommendation"] = recommendation
