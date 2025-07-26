@@ -60,6 +60,7 @@ def rag_recommender(state: RecState) -> RecState:
     try:
         query = state["query"]
         docs = state.get("docs", [])
+        products = state.get("products", "")
 
         # --------- 品类过滤逻辑 begin ---------
         CATEGORY_KEYWORDS = ["裙", "裤", "衬衫", "T恤", "夹克", "外套", "背心"]
@@ -87,8 +88,20 @@ def rag_recommender(state: RecState) -> RecState:
         state["docs"] = docs
         # --------- 品类过滤逻辑 end ---------
         
-        if not docs:
-            logger.warning("No documents found for RAG recommendation")
+        # 如果docs为空但有products，使用products
+        if not docs and products:
+            logger.info("Using products from ranker_node for RAG recommendation")
+            # 将products字符串转换为docs格式
+            products_list = products.split("\n\n")
+            docs = []
+            for product in products_list:
+                if product.strip():
+                    # 移除开头的 "- " 并创建文档对象
+                    content = product.strip("- ")
+                    docs.append({"page_content": content})
+        
+        if not docs and not products:
+            logger.warning("No documents or products found for RAG recommendation")
             state["recommendation"] = "抱歉，我没有找到相关的产品信息。请尝试更具体的查询。"
             return state
 
