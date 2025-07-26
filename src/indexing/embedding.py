@@ -26,6 +26,7 @@ from src.config import settings
 from src.indexing.jieba_bm25 import create_jieba_bm25_index, save_jieba_bm25_index
 
 warnings.filterwarnings("ignore")
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
