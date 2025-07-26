@@ -71,16 +71,14 @@ class CustomChromaTranslator(BaseChromaTranslator):
 
     def visit_comparison(self, comparison: Comparison):
         """
-        Chroma does NOT allow '$contains' or substring filtering out-of-the-box.
-        We'll interpret `LIKE(attribute, value)` as a substring search:
-            {"attribute": {"$regex": value}}
-        For `CONTAIN(attribute, value)`, we'll use the same logic as LIKE.
-        
-        This works for string fields like "Available Sizes" which store values like "Size：S,M,L,XL,XXL"
+        Chroma does NOT support $regex or $contains operators.
+        For size matching, we'll skip the filter since ChromaDB doesn't support substring matching.
+        This will allow semantic search to work while avoiding the filtering error.
         """
         if comparison.comparator == Comparator.LIKE or comparison.comparator == Comparator.CONTAIN:
-            # Use $regex to check if 'comparison.value' is contained in the attribute string
-            return {comparison.attribute: {"$regex": comparison.value}}
+            # Skip size filtering for now since ChromaDB doesn't support substring matching
+            # This will allow the query to proceed with semantic search only
+            return None
         # Otherwise, do default logic for eq, gt, gte, lt, lte, etc.
         return super().visit_comparison(comparison)
 
@@ -98,8 +96,7 @@ ATTRIBUTE_INFO = [
         "name": "Available Sizes",
         "description": (
             "Sizes available for the product (stored as a comma-separated string, e.g., 'small, medium, large'). "
-            "Use the `like` operator to check if a size is included. "
-            'Example: `like("Available Sizes", "xl")` to find products that have XL in their size options.'
+            "Note: Size filtering is not supported in this implementation."
         ),
     },
     {
