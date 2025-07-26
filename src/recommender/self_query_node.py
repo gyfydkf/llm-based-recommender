@@ -70,11 +70,58 @@ def build_self_query_chain(vectorstore: Chroma) -> RunnableLambda:
 
     attribute_info, doc_contents = get_metadata_info()
 
-    # Build the query-constructor chain
+    # 自定义示例来指导LLM生成正确的查询格式
+    examples = [
+        {
+            "query": "我需要一件中码的运动上衣，价格100以内",
+            "structured_query": {
+                "query": "运动上衣",
+                "filter": "and(lt(\"Product Price\", 100), like(\"Available Sizes\", \"M\"))"
+            }
+        },
+        {
+            "query": "推荐一些Nike品牌的T恤",
+            "structured_query": {
+                "query": "Nike T恤",
+                "filter": "like(\"Brand Name\", \"Nike\")"
+            }
+        },
+        {
+            "query": "找一些价格在200-500之间的连衣裙",
+            "structured_query": {
+                "query": "连衣裙",
+                "filter": "and(gte(\"Product Price\", 200), lte(\"Product Price\", 500))"
+            }
+        },
+        {
+            "query": "推荐一些适合夏天的短袖上衣",
+            "structured_query": {
+                "query": "夏天短袖上衣",
+                "filter": "NO_FILTER"
+            }
+        },
+        {
+            "query": "冰丝上衣价格100以内",
+            "structured_query": {
+                "query": "冰丝上衣",
+                "filter": "lt(\"Product Price\", 100)"
+            }
+        },
+        {
+            "query": "中码的T恤",
+            "structured_query": {
+                "query": "T恤",
+                "filter": "like(\"Available Sizes\", \"M\")"
+            }
+        }
+    ]
+
+    # Build the query-constructor chain with custom examples
     query_constructor = load_query_constructor_runnable(
         llm=llm,
         document_contents=doc_contents,
         attribute_info=attribute_info,
+        examples=examples,
     )
 
     # Create a SelfQueryRetriever (LangChain v0.3.x 新接口)

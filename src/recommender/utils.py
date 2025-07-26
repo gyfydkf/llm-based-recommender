@@ -61,23 +61,26 @@ def get_language_specific_response(query: str, response_type: str = "error") -> 
 class CustomChromaTranslator(BaseChromaTranslator):
     def __init__(self):
         super().__init__()
-        # `allowed_comparators` is a list; convert to set, then add `LIKE`, then back to list
+        # `allowed_comparators` is a list; convert to set, then add `LIKE` and `CONTAIN`, then back to list
         if self.allowed_comparators is None:
             self.allowed_comparators = []
         allowed_comparator_set = set(self.allowed_comparators)
         allowed_comparator_set.add(Comparator.LIKE)
+        allowed_comparator_set.add(Comparator.CONTAIN)
         self.allowed_comparators = list(allowed_comparator_set)
 
     def visit_comparison(self, comparison: Comparison):
         """
         Chroma does NOT allow '$contains' or substring filtering out-of-the-box.
-        We'll interpret `LIKE(attribute, value)` as an array-membership check:
-            {"attribute": {"$in": [value]}}
-        For this to work, your metadata must store `attribute` as a list of items.
+        We'll interpret `LIKE(attribute, value)` as a substring search:
+            {"attribute": {"$regex": value}}
+        For `CONTAIN(attribute, value)`, we'll use the same logic as LIKE.
+        
+        This works for string fields like "Available Sizes" which store values like "Size：S,M,L,XL,XXL"
         """
-        if comparison.comparator == Comparator.LIKE:
-            # Use $in to check if 'comparison.value' is in the attribute's list.
-            return {comparison.attribute: {"$in": [comparison.value]}}
+        if comparison.comparator == Comparator.LIKE or comparison.comparator == Comparator.CONTAIN:
+            # Use $regex to check if 'comparison.value' is contained in the attribute string
+            return {comparison.attribute: {"$regex": comparison.value}}
         # Otherwise, do default logic for eq, gt, gte, lt, lte, etc.
         return super().visit_comparison(comparison)
 

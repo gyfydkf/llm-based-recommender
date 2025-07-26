@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     
     # Ollama settings (fallback)
     # OLLAMA_MODEL_NAME: str = "llama3.1:8b"
-    OLLAMA_MODEL_NAME: str = "llamafamily/llama3-chinese-8b-instruct:latest"
+    OLLAMA_MODEL_NAME: str = "qwen2.5:7b"
     OLLAMA_HOST: str = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
     
     # LLM Provider Selection
