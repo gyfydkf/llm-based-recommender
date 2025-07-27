@@ -76,13 +76,22 @@ def rag_recommender(state: RecState) -> RecState:
             if not category:
                 return docs
             filtered = []
+            logger.info(f"Filtering docs by category: {category}")
             for doc in docs:
                 # 兼容 page_content 为 json 或 str
                 details = ""
                 if hasattr(doc, "metadata") and isinstance(doc.metadata, dict):
                     details = doc.metadata.get("Product Details", "")
                 if not details and hasattr(doc, "page_content"):
-                    details = doc.page_content
+                    # 尝试从 page_content 的 JSON 中提取 Product Details
+                    try:
+                        import json
+                        content_dict = json.loads(doc.page_content)
+                        details = content_dict.get("Product Details", "")
+                    except (json.JSONDecodeError, AttributeError):
+                        # 如果解析失败，使用原始 page_content
+                        details = doc.page_content
+                logger.info(f"Details: {details}")
                 if category in details:
                     filtered.append(doc)
             return filtered
@@ -94,17 +103,14 @@ def rag_recommender(state: RecState) -> RecState:
         # 如果docs为空但有products，使用products
         if not docs and products:
             logger.info("Using products from ranker_node for RAG recommendation")
-            # 将products字符串转换为docs格式
-            products_list = products.split("\n\n")
-            docs = []
-            for product in products_list:
-                if product.strip():
-                    # 移除开头的 "- " 并创建文档对象
-                    content = product.strip("- ")
-                    docs.append({"page_content": content})
-            category = extract_category_from_query(query)
-            docs = filter_docs_by_category(docs, category)
-            state["docs"] = docs
+            rag_chain = build_rag_chain()
+            recommendation = rag_chain.invoke({
+                "query": query,
+                "docs": products
+            })
+            state["recommendation"] = recommendation
+            logger.info(f"Generated RAG recommendation for query: {query}")
+            return state
         
         # 如果docs和products都为空，且还没有尝试过ranker，则跳转到ranker
         if not docs and not products and not ranker_attempted:
@@ -117,16 +123,13 @@ def rag_recommender(state: RecState) -> RecState:
             state["recommendation"] = "抱歉，我没有找到相关的产品信息。请尝试更具体的查询。"
             return state
 
-        # 使用最新的docs值（可能来自products转换）
-        final_docs = state.get("docs", docs)
-
         # Build the RAG chain
         rag_chain = build_rag_chain()
         
         # Generate recommendation
         recommendation = rag_chain.invoke({
             "query": query,
-            "docs": final_docs
+            "docs": [doc.page_content for doc in docs]
         })
         
         state["recommendation"] = recommendation
