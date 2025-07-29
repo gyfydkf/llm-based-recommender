@@ -17,6 +17,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.config import settings
 from src.recommender.state import RecState
+from src.recommender.utils import filter_docs_by_category, extract_category_from_query
 
 
 def load_cross_encoder_model() -> HuggingFaceEmbeddings:
@@ -37,14 +38,15 @@ def build_ranker(query: str):
     """
     cross_encoder = load_cross_encoder_model()
 
-    def format_docs(docs: List[Document]):
-        return "\n\n".join([f"- {doc.page_content}" for doc in docs])
+    # def format_docs(docs: List[Document]):
+    #     return "\n\n".join([f"- {doc.page_content}" for doc in docs])
 
     product_docs = cross_encoder.invoke(query)
-    logger.info(f"Retrieved {len(product_docs)} documents.")
+    logger.info(f"ranker: Retrieved {len(product_docs)} documents.")
 
-    products = format_docs(product_docs)
-    return products
+    category = extract_category_from_query(query)
+    docs = filter_docs_by_category(product_docs, category)
+    return docs
 
 
 def ranker_node(state: RecState) -> RecState:
@@ -52,7 +54,8 @@ def ranker_node(state: RecState) -> RecState:
     Ranker node.
     """
     query = state["query"]
-    product_list = build_ranker(query)
-    state["products"] = product_list
+    docs = build_ranker(query)
+    margin = 3 - len(state["docs"])
+    state["docs"].extend(docs[:margin])
     state["ranker_attempted"] = True
     return state

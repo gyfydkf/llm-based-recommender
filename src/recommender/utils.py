@@ -8,6 +8,7 @@ from langchain_community.query_constructors.chroma import (
     ChromaTranslator as BaseChromaTranslator,
 )
 from langchain_core.structured_query import Comparator, Comparison
+from loguru import logger
 
 
 def detect_language(text: str) -> str:
@@ -139,3 +140,34 @@ def create_rag_template():
 
     prompt = PromptTemplate(template=prompt_template, input_variables=["docs", "query"])
     return prompt
+
+CATEGORY_KEYWORDS = ["裙", "裤", "衬衫", "T恤", "夹克", "外套", "背心"]
+
+def extract_category_from_query(query):
+    for cat in CATEGORY_KEYWORDS:
+        if cat in query:
+            return cat
+    return None
+
+def filter_docs_by_category(docs, category):
+    if not category:
+        return docs
+    filtered = []
+    logger.info(f"Filtering docs by category: {category}")
+    for doc in docs:
+        details = ""
+        if hasattr(doc, "metadata") and isinstance(doc.metadata, dict):
+            details = doc.metadata.get("Product Details", "")
+        if not details and hasattr(doc, "page_content"):
+            # 尝试从 page_content 的 JSON 中提取 Product Details
+            try:
+                import json
+                content_dict = json.loads(doc.page_content)
+                details = content_dict.get("Product Details", "")
+            except (json.JSONDecodeError, AttributeError):
+                # 如果解析失败，使用原始 page_content
+                details = doc.page_content
+        logger.info(f"Details: {details}")
+        if category in details:
+            filtered.append(doc)
+    return filtered

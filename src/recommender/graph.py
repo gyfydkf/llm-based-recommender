@@ -59,7 +59,6 @@ def create_recommendaer_graph():
     workflow.add_node("not_fashion_llm_response", not_fashion_llm_response)  # 新增节点
 
     workflow.add_edge("ranker", "rag_recommender")
-    workflow.add_edge("rag_recommender", END)
     workflow.add_edge("not_fashion_llm_response", END)  # 新增终止
 
     workflow.set_entry_point("check_topic")
@@ -78,7 +77,7 @@ def create_recommendaer_graph():
     # 新增：rag_recommender的条件边
     workflow.add_conditional_edges(
         "rag_recommender",
-        lambda state: "continue" if not state.get("docs") and not state.get("products") and not state.get("ranker_attempted") else "end",
+        lambda state: "continue" if len(state["docs"]) < 2 and not state.get("ranker_attempted") else "end",
         {"continue": "ranker", "end": END},
     )
     
