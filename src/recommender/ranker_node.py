@@ -17,7 +17,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.config import settings
 from src.recommender.state import RecState
-from src.recommender.utils import filter_docs_by_category, extract_category_from_query
+from src.recommender.utils import filter_docs_by_category, extract_category_from_query, basic_filter
 
 
 def load_cross_encoder_model() -> HuggingFaceEmbeddings:
@@ -44,8 +44,10 @@ def build_ranker(query: str):
     product_docs = cross_encoder.invoke(query)
     logger.info(f"ranker: Retrieved {len(product_docs)} documents.")
 
+    docs = basic_filter(query, product_docs)
     category = extract_category_from_query(query)
     docs = filter_docs_by_category(product_docs, category)
+    logger.info(f"ranker: after filter there are {len(docs)} documents.")
     return docs
 
 
