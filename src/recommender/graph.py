@@ -77,7 +77,7 @@ def create_recommendaer_graph():
     # 新增：rag_recommender的条件边
     workflow.add_conditional_edges(
         "rag_recommender",
-        lambda state: "continue" if len(state["docs"]) < 2 and not state.get("ranker_attempted") else "end",
+        lambda state: "continue" if len(state["docs"]) < 3 and not state.get("ranker_attempted") else "end",
         {"continue": "ranker", "end": END},
     )
     

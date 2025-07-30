@@ -5,7 +5,7 @@ import requests
 import streamlit as st
 
 # Backend API URL
-API_URL = os.getenv("API_URL", "http://localhost:8000")
+API_URL = os.getenv("API_URL", "https://bee-touched-mink.ngrok-free.app")
 
 # Page Config
 st.set_page_config(

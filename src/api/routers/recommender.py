@@ -46,7 +46,6 @@ def get_chat_response(request: QuestionRequest):
             "query": request.question,
             "on_topic": False,  # 默认值，会被check_topic节点更新
             "recommendation": "",  # 默认空字符串
-            "products": "",  # 默认空字符串
             "self_query_state": "",  # 默认空字符串
             "docs": [],  # 默认空列表
             "ranker_attempted": False,  # 默认False，表示还没有尝试过ranker
@@ -56,7 +55,9 @@ def get_chat_response(request: QuestionRequest):
         recommendation = response.get(
             "recommendation", "No recommendation found for your request."
         )
-        content = {"question": request.question, "answer": recommendation}
+        docs = response.get("docs", [])
+        indexes = [doc.id for doc in docs]
+        content = {"question": request.question, "answer": recommendation, "indexes": indexes}
         logger.info(content)
         return JSONResponse(
             content=content,

@@ -59,7 +59,6 @@ def rag_recommender(state: RecState) -> RecState:
     try:
         query = state["query"]
         docs = state.get("docs", [])
-        products = state.get("products", "")
         ranker_attempted = state.get("ranker_attempted", False)
 
         # --------- 品类过滤逻辑 begin ---------
@@ -89,7 +88,7 @@ def rag_recommender(state: RecState) -> RecState:
             category = extract_category_from_query(query)
             docs = filter_docs_by_category(docs, category)
             state["docs"] = docs
-            if len(docs) < 2:
+            if len(docs) < 3:
                 logger.info(f"{len(docs)} documents found for RAG recommendation, will try ranker node")
                 return state
         

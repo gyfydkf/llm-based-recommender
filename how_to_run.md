@@ -65,4 +65,10 @@
    streamlit run src/ui/app.py
    ```
 
+8. fastapi内网穿透
+
+   ```
+   ngrok http --url=bee-touched-mink.ngrok-free.app 8000
+   ```
+
    
