@@ -67,15 +67,6 @@ def get_chat_response(request: QuestionRequest):
         docs = response.get("docs", [])
         indexes = [doc.id for doc in docs]
         
-        # 检查是否有推荐结果
-        if not indexes:
-            error_content = {
-                "code": 404,
-                "message": "没有找到相关推荐结果",
-                "data": None
-            }
-            raise HTTPException(status_code=404, detail=error_content)
-        
         # 统一的成功响应格式
         content = {
             "code": 200,
