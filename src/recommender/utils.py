@@ -9,6 +9,11 @@ from langchain_community.query_constructors.chroma import (
 )
 from langchain_core.structured_query import Comparator, Comparison
 from loguru import logger
+import json
+import requests
+import ast
+
+from src.config import settings
 
 
 def detect_language(text: str) -> str:
@@ -127,7 +132,7 @@ def create_rag_template():
     - **与用户偏好的匹配**（例如，价格、品牌、风格等）
     - **高用户评分和受欢迎程度**
     - **与用户意图的相关性**
-
+    
     **请用自然语言回复，就像你亲自在帮助用户一样。**
     
     示例回复（仅供参考）：
@@ -171,3 +176,48 @@ def filter_docs_by_category(docs, category):
         if category in details:
             filtered.append(doc)
     return filtered
+
+def convert_item_to_page_content(item):
+    page_content_dict = {
+        "Brand Name": item["brand"],
+        "Product Details": item["description"],
+        "Product Price": item["price"],
+        "Available Sizes": ", ".join([variation["sizeName"] for variation in item["variations"]]),
+    }
+    return json.dumps(page_content_dict, indent=2, ensure_ascii=False)
+
+
+def get_product_details():
+    base_url = "https://cloudawn3d.com/mall/getProductDetail/"
+    out_path = settings.PROCESSED_DATA_PATH
+
+    try:
+        database = []
+        logger.info(f"Fetching product details from database...")
+        for i in range(1,13):
+            response = requests.get(base_url + str(i))
+            response.raise_for_status()  # 检查请求是否成功
+            response_text = json.loads(response.text)
+            if "data" in response_text:
+                database.append(response_text["data"])
+        logger.info(f"loaded {len(database)} items")
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(database, f, ensure_ascii=False, indent=4)
+    except requests.RequestException as e:
+        logger.error(f"请求失败: {e}") 
+
+
+def convert_docs_to_prompt(docs):
+    prompt = ""
+    for doc in docs:
+        available_sizes = ", ".join([variation["sizeName"] for variation in ast.literal_eval(doc.metadata["variations"])])
+        prompt += f"产品名称: \"{doc.metadata['productName']}\", 颜色: {ast.literal_eval(doc.metadata["variations"])[0]['colorName']}, 价格: {doc.metadata['price']}, 可用尺码: {available_sizes}\n"
+    return prompt
+
+
+if __name__ == "__main__":
+    with open(settings.PROCESSED_DATA_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    from src.indexing.embedding import generate_documents
+    docs = generate_documents()
+    print(convert_docs_to_prompt(docs))

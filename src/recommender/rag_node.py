@@ -17,7 +17,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.config import settings
 from src.recommender.state import RecState
-from src.recommender.utils import create_rag_template, extract_category_from_query, filter_docs_by_category
+from src.recommender.utils import create_rag_template, extract_category_from_query, filter_docs_by_category, convert_docs_to_prompt
 from src.recommender.llm_factory import get_llm
 
 def build_rag_chain():
@@ -104,7 +104,7 @@ def rag_recommender(state: RecState) -> RecState:
         # Generate recommendation
         recommendation = rag_chain.invoke({
             "query": query,
-            "docs": [doc.page_content for doc in docs]
+            "docs": convert_docs_to_prompt(docs)
         })
         
         state["recommendation"] = recommendation

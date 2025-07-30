@@ -24,6 +24,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 from src.config import settings
 # from src.indexing.data_loader import download_data
 from src.indexing.jieba_bm25 import create_jieba_bm25_index, save_jieba_bm25_index
+from src.recommender.utils import convert_item_to_page_content, get_product_details
 
 warnings.filterwarnings("ignore")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -74,50 +75,85 @@ def load_and_preprocess_data(n_samples: Optional[int] = 2000) -> pd.DataFrame:
     return df
 
 
-def generate_documents(use_csv_loader: bool = False) -> list:
-    """Converts CSV data into LangChain Document objects."""
-    if use_csv_loader:
-        try:
-            loader = CSVLoader(settings.PROCESSED_DATA_PATH, encoding="utf-8")
-            documents = loader.load()
-            logger.info(f"Generated {len(documents)} documents.")
-            return documents
-        except Exception as e:
-            logger.exception("Failed to generate documents.")
-            raise e
+# def generate_documents(use_csv_loader: bool = False) -> list:
+#     """Converts CSV data into LangChain Document objects."""
+#     if use_csv_loader:
+#         try:
+#             loader = CSVLoader(settings.PROCESSED_DATA_PATH, encoding="utf-8")
+#             documents = loader.load()
+#             logger.info(f"Generated {len(documents)} documents.")
+#             return documents
+#         except Exception as e:
+#             logger.exception("Failed to generate documents.")
+#             raise e
 
-    def convert_price(value):
-        try:
-            return float(str(value).replace(",", "").strip())
-        except ValueError:
-            return 0.0
+#     def convert_price(value):
+#         try:
+#             return float(str(value).replace(",", "").strip())
+#         except ValueError:
+#             return 0.0
 
-    def convert_sizes(value):
-        """Convert sizes from string to a comma-separated string."""
-        if pd.isna(value) or not isinstance(value, str):
-            return ""
-        return ", ".join(
-            size.strip().lower() for size in value.replace("Size:", "").split(",")
+#     def convert_sizes(value):
+#         """Convert sizes from string to a comma-separated string."""
+#         if pd.isna(value) or not isinstance(value, str):
+#             return ""
+#         return ", ".join(
+#             size.strip().lower() for size in value.replace("Size:", "").split(",")
+#         )
+
+#     df = pd.read_csv(settings.PROCESSED_DATA_PATH)
+
+#     # Convert "Available Sizes"
+#     if "Available Sizes" in df.columns:
+#         df["Available Sizes"] = df["Available Sizes"].apply(convert_sizes)
+
+#     # Convert "Product Price" to float
+#     if "Product Price" in df.columns:
+#         df["Product Price"] = df["Product Price"].apply(convert_price)
+
+#     documents = [
+#         Document(
+#             page_content=json.dumps(row.to_dict(), indent=2, ensure_ascii=False),
+#             metadata=row.to_dict(),
+#             id=row.name,
+#         )
+#         for _, row in df.iterrows()
+#     ]
+#     logger.info(f"Generated {len(documents)} documents.")
+#     return documents
+
+
+def generate_documents() -> list:
+    """Convert json data into LangChain Document objects."""
+    if not os.path.exists(settings.PROCESSED_DATA_PATH):
+        logger.info("Processed data file not found at {settings.PROCESSED_DATA_PATH}")
+        get_product_details()
+
+    with open(settings.PROCESSED_DATA_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    
+    documents = []
+    for item in data:
+        # 过滤 metadata，只保留 Chroma 支持的数据类型
+        filtered_metadata = {}
+        for key, value in item.items():
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                filtered_metadata[key] = value
+            elif isinstance(value, list):
+                # 如果是列表，转换为字符串
+                filtered_metadata[key] = str(value)
+            else:
+                # 其他类型转换为字符串
+                filtered_metadata[key] = str(value)
+        
+        documents.append(
+            Document(
+                page_content=convert_item_to_page_content(item),
+                metadata=filtered_metadata,
+                id=item["id"],
+            )
         )
-
-    df = pd.read_csv(settings.PROCESSED_DATA_PATH)
-
-    # Convert "Available Sizes"
-    if "Available Sizes" in df.columns:
-        df["Available Sizes"] = df["Available Sizes"].apply(convert_sizes)
-
-    # Convert "Product Price" to float
-    if "Product Price" in df.columns:
-        df["Product Price"] = df["Product Price"].apply(convert_price)
-
-    documents = [
-        Document(
-            page_content=json.dumps(row.to_dict(), indent=2, ensure_ascii=False),
-            metadata=row.to_dict(),
-            id=row.name,
-        )
-        for _, row in df.iterrows()
-    ]
+    
     logger.info(f"Generated {len(documents)} documents.")
     return documents
 

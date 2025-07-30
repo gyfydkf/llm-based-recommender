@@ -29,7 +29,8 @@ class Settings(BaseSettings):
     # Data settings
     DATASET: str = "mukuldeshantri/ecommerce-fashion-dataset"
     RAW_DATA_PATH: str = str(DATA_DIR / "FashionDataset.csv")
-    PROCESSED_DATA_PATH: str = str(DATA_DIR / "processed_data.csv")
+    # PROCESSED_DATA_PATH: str = str(DATA_DIR / "processed_data.csv")
+    PROCESSED_DATA_PATH: str = str(DATA_DIR / "processed_data.json")
 
     # Kaggle settings
     KAGGLE_USERNAME: str = os.environ.get("KAGGLE_USERNAME", "")
