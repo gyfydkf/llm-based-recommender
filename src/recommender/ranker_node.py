@@ -55,7 +55,7 @@ def ranker_node(state: RecState) -> RecState:
     """
     query = state["query"]
     docs = build_ranker(query)
-    margin = 3 - len(state["docs"])
+    margin = settings.TOTAL_TOP_K - len(state["docs"])
     state["docs"].extend(docs[:margin])
     state["ranker_attempted"] = True
     return state

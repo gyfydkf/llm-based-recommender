@@ -12,6 +12,7 @@ from src.recommender.rag_node import rag_recommender
 from src.recommender.ranker_node import ranker_node
 from src.recommender.self_query_node import build_self_query_chain
 from src.recommender.state import RecState
+from src.config import settings
 
 set_debug(True)
 
@@ -77,7 +78,7 @@ def create_recommendaer_graph():
     # 新增：rag_recommender的条件边
     workflow.add_conditional_edges(
         "rag_recommender",
-        lambda state: "continue" if len(state["docs"]) < 3 and not state.get("ranker_attempted") else "end",
+        lambda state: "continue" if len(state["docs"]) < settings.TOTAL_TOP_K and not state.get("ranker_attempted") else "end",
         {"continue": "ranker", "end": END},
     )
     

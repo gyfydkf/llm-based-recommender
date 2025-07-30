@@ -83,13 +83,15 @@ class Settings(BaseSettings):
     # Guadrail settings
     GUARDRAIL_SETTINGS_DIR: str = str(BASE_DIR / "src" / "core" / "guardrail")
 
+    TOTAL_TOP_K: int = 2
+
     FAISS_TOP_K: int = 3
     BM25_TOP_K: int = 3
 
     RETRIEVER_TOP_K: int = 5
     RETRIEVER_WEIGHTS: list[float] = [0.5, 0.5]
 
-    COMPRESSOR_TOP_K: int = 3
+    COMPRESSOR_TOP_K: int = 2
 
     # Logging settings
     LOGGING_LEVEL: str = "INFO"

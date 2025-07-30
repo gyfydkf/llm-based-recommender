@@ -88,7 +88,7 @@ def rag_recommender(state: RecState) -> RecState:
             category = extract_category_from_query(query)
             docs = filter_docs_by_category(docs, category)
             state["docs"] = docs
-            if len(docs) < 3:
+            if len(docs) < settings.TOTAL_TOP_K:
                 logger.info(f"{len(docs)} documents found for RAG recommendation, will try ranker node")
                 return state
         
