@@ -72,8 +72,8 @@ class Settings(BaseSettings):
     OLLAMA_HOST: str = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
     
     # LLM Provider Selection
-    USE_OPENROUTER: bool = True
-    USE_OLLAMA: bool = False
+    USE_OPENROUTER: bool = False
+    USE_OLLAMA: bool = True
 
     # FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index.faiss")
     FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index")
