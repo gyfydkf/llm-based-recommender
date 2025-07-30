@@ -17,7 +17,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.config import settings
 from src.recommender.state import RecState
-from src.recommender.utils import create_rag_template, extract_category_from_query, filter_docs_by_category, convert_docs_to_prompt
+from src.recommender.utils import create_rag_template, extract_category_from_query, filter_docs_by_category, convert_docs_to_prompt, basic_filter
 from src.recommender.llm_factory import get_llm
 
 def build_rag_chain():
@@ -85,6 +85,7 @@ def rag_recommender(state: RecState) -> RecState:
         #     return state  # 让图流程继续到ranker节点
 
         if not ranker_attempted:
+            docs = basic_filter(query, docs)
             category = extract_category_from_query(query)
             docs = filter_docs_by_category(docs, category)
             state["docs"] = docs

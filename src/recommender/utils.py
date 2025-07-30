@@ -146,7 +146,7 @@ def create_rag_template():
     prompt = PromptTemplate(template=prompt_template, input_variables=["docs", "query"])
     return prompt
 
-CATEGORY_KEYWORDS = ["裙", "裤", "衬衫", "T恤", "夹克", "外套", "背心"]
+CATEGORY_KEYWORDS = ["长裙", "长裤", "短裙", "短裤", "衬衫", "T恤", "Polo衫", "休闲裤"]
 
 def extract_category_from_query(query):
     for cat in CATEGORY_KEYWORDS:
@@ -154,24 +154,38 @@ def extract_category_from_query(query):
             return cat
     return None
 
+def extract_details_from_doc(doc):
+    details = ""
+    if hasattr(doc, "page_content"):
+        # 尝试从 page_content 的 JSON 中提取 Product Details
+        try:
+            content_dict = json.loads(doc.page_content)
+            details = content_dict.get("Product Details", "")
+        except (json.JSONDecodeError, AttributeError):
+            # 如果解析失败，使用原始 page_content
+            details = doc.page_content
+    return details
+
+def basic_filter(query, docs):
+    filtered = []
+    bottoms = ["裤", "裙"]
+    if "衣" in query and "裤" in query:
+        filtered = docs
+    elif "衣" in query:
+        filtered = [doc for doc in docs if not any(bottom in extract_details_from_doc(doc) for bottom in bottoms)]
+    elif "裤" in query:
+        filtered = [doc for doc in docs if "裤" in extract_details_from_doc(doc)]
+    elif "裙" in query:
+        filtered = [doc for doc in docs if "裙" in extract_details_from_doc(doc)]
+    return filtered
+
 def filter_docs_by_category(docs, category):
     if not category:
         return docs
     filtered = []
     logger.info(f"Filtering docs by category: {category}")
     for doc in docs:
-        details = ""
-        if hasattr(doc, "metadata") and isinstance(doc.metadata, dict):
-            details = doc.metadata.get("Product Details", "")
-        if not details and hasattr(doc, "page_content"):
-            # 尝试从 page_content 的 JSON 中提取 Product Details
-            try:
-                import json
-                content_dict = json.loads(doc.page_content)
-                details = content_dict.get("Product Details", "")
-            except (json.JSONDecodeError, AttributeError):
-                # 如果解析失败，使用原始 page_content
-                details = doc.page_content
+        details = extract_details_from_doc(doc)
         logger.info(f"Details: {details}")
         if category in details:
             filtered.append(doc)

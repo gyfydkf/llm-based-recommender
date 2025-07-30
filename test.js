@@ -4,7 +4,7 @@ fetch('https://bee-touched-mink.ngrok-free.app/recommend', {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      question: "我需要一件白色T恤"
+      question: "我要一件T恤"
     })
   })
   .then(response => response.json())
