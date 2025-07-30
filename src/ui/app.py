@@ -151,7 +151,7 @@ if send_button:
             response = requests.post(API_URL + "/recommend", json={"question": query})
 
             if response.status_code == 200:
-                answer = response.json().get("answer", "No recommendation found.")
+                answer = response.json().get("data", {}).get("answer", "No recommendation found.")
             else:
                 answer = "Error: Unable to fetch recommendation."
 

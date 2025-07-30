@@ -57,11 +57,24 @@ def get_chat_response(request: QuestionRequest):
         )
         docs = response.get("docs", [])
         indexes = [doc.id for doc in docs]
-        content = {"question": request.question, "answer": recommendation, "indexes": indexes}
+        
+        # 统一的成功响应格式
+        content = {
+            "code": 200,
+            "message": "成功",
+            "data": {
+                "answer": recommendation,
+                "indexes": indexes
+            }
+        }
         logger.info(content)
-        return JSONResponse(
-            content=content,
-        )
+        return JSONResponse(content=content)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+        # 错误响应格式
+        error_content = {
+            "code": 500,
+            "message": f"Error: {str(e)}",
+            "data": None
+        }
+        raise HTTPException(status_code=500, detail=error_content)
