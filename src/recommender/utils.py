@@ -12,7 +12,7 @@ from loguru import logger
 import json
 import requests
 import ast
-
+import os
 from src.config import settings
 
 
@@ -132,7 +132,7 @@ def create_rag_template():
     - **与用户偏好的匹配**（例如，价格、品牌、风格等）
     - **高用户评分和受欢迎程度**
     - **与用户意图的相关性**
-    
+
     **请用自然语言回复，就像你亲自在帮助用户一样。**
     
     示例回复（仅供参考）：
@@ -201,6 +201,7 @@ def get_product_details():
             if "data" in response_text:
                 database.append(response_text["data"])
         logger.info(f"loaded {len(database)} items")
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(database, f, ensure_ascii=False, indent=4)
     except requests.RequestException as e:
