@@ -46,7 +46,7 @@ def build_ranker(query: str):
 
     docs = basic_filter(query, product_docs)
     category = extract_category_from_query(query)
-    docs = filter_docs_by_category(product_docs, category)
+    docs = filter_docs_by_category(docs, category)
     logger.info(f"ranker: after filter there are {len(docs)} documents.")
     return docs
 

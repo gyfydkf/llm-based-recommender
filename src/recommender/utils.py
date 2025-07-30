@@ -235,4 +235,4 @@ if __name__ == "__main__":
         data = json.load(f)
     from src.indexing.embedding import generate_documents
     docs = generate_documents()
-    print(convert_docs_to_prompt(docs))
+    print(extract_details_from_doc(docs[0]))
